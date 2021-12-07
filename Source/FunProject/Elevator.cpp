@@ -18,7 +18,7 @@ AElevator::AElevator()
 	ThePlatform->SetupAttachment(TheRoot);
 
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(FName("BoxCollision"));
-	BoxCollision-> SetupAttachment(TheRoot);
+	BoxCollision-> SetupAttachment(ThePlatform);
 
 
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TheCubeMesh(TEXT("/Game/Art/Meshes/1M_Cube"));
@@ -27,11 +27,13 @@ AElevator::AElevator()
 		ThePlatform->SetStaticMesh(TheCubeMesh.Object);
 	}
 	ElevatorAnim = CreateDefaultSubobject<UTimelineComponent>(FName("Elevatortimeline"));
+
 }
 
 void AElevator::OnAnimUpdate(float val)
 {
-	SetActorLocation(FVector(0, 0, val));
+	ThePlatform->SetRelativeLocation(FVector(0, 0, val));
+	BoxCollision->SetRelativeLocation(FVector(0, 0, val));
 }
 
 // Called when the game starts or when spawned
