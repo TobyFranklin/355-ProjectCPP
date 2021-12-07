@@ -3,10 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-
 #include "GameFramework/Actor.h"
+#include "Components/TimelineComponent.h"
+#include "Components/BoxComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "InteractableThing.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/Character.h"
 #include "Door.generated.h"
 
 
@@ -28,6 +31,10 @@ public:
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
 		class USceneComponent* TheHinge;
 
+		// scene component for the hinge
+		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
+			class UBoxComponent* Collider;
+
 		// mesh for door
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
 		class UStaticMeshComponent* TheMeshDoor;
@@ -35,6 +42,9 @@ public:
 		// mesh for door frame
 		UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
 		class UInstancedStaticMeshComponent* TheMeshFrame;
+
+		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DoorStuff")
+		UCurveFloat* doorOpenCurve;
 
 		// variable for the width of the door
 		UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Door Stuff")
@@ -52,6 +62,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION()
+	void OnAnimUpdate(float val);
+
+
+	UTimelineComponent* DoorAnim;
+
+	bool IsDoorFlipped = false;
+	bool IsDoorOpen = false;
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -20,12 +20,18 @@ AElevator::AElevator()
 	BoxCollision = CreateDefaultSubobject<UBoxComponent>(FName("BoxCollision"));
 	BoxCollision-> SetupAttachment(TheRoot);
 
+
 	ConstructorHelpers::FObjectFinder<UStaticMesh>TheCubeMesh(TEXT("/Game/Art/Meshes/1M_Cube"));
 
 	if (TheCubeMesh.Object) {
 		ThePlatform->SetStaticMesh(TheCubeMesh.Object);
 	}
+	ElevatorAnim = CreateDefaultSubobject<UTimelineComponent>(FName("Elevatortimeline"));
+}
 
+void AElevator::OnAnimUpdate(float val)
+{
+	SetActorLocation(FVector(0, 0, val));
 }
 
 // Called when the game starts or when spawned
@@ -33,6 +39,14 @@ void AElevator::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	if (ElevatorCurve) {
+		FOnTimelineFloat eventHandler;
+		eventHandler.BindUFunction(this, TEXT("OnAnimUpdate"));
+		eventHandler.BindDynamic(this, &AElevator::OnAnimUpdate);
+		ElevatorAnim->AddInterpFloat(ElevatorCurve, eventHandler, FName("Handle curve func"));
+		ElevatorAnim->SetTimelineLengthMode(ETimelineLengthMode::TL_LastKeyFrame);
+	}
+
 	BoxCollision->OnComponentBeginOverlap.AddDynamic(this, &AElevator::OnOverlapBegin);
 
 	BoxCollision->OnComponentEndOverlap.AddDynamic(this, &AElevator::OnOverlapEnd);
@@ -43,14 +57,14 @@ void AElevator::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (Overlapping && GetActorLocation().Z <=MaxHeight)
-	{
-		TheRoot->SetWorldLocation(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + Speed));
-	}
-	else if(!Overlapping && GetActorLocation().Z >= ReturnLocation)
-	{
-		TheRoot->SetWorldLocation(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - (Speed)));
-	}
+	// if (Overlapping && GetActorLocation().Z <=MaxHeight)
+	//{
+		//TheRoot->SetWorldLocation(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z + Speed));
+	//}
+	//else if(!Overlapping && GetActorLocation().Z >= ReturnLocation)
+	//{
+		//TheRoot->SetWorldLocation(FVector(GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z - (Speed)));
+	//}
 }
 
 void AElevator::OnConstruction(const FTransform& xform)
@@ -71,11 +85,13 @@ void AElevator::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* Othe
 {
 	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Green, "Player is overlapping");
 	Overlapping = true;
+	ElevatorAnim->Play();
 }
 
 void AElevator::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Green, "Player is done overlapping");
 	Overlapping = false;
+	ElevatorAnim->Reverse();
 }
 

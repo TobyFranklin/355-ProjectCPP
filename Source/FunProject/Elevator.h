@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Components/TimelineComponent.h"
 #include "Components/BoxComponent.h"
 #include "Elevator.generated.h"
 
@@ -25,6 +26,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Componenets")
 	class UStaticMeshComponent* ThePlatform;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UCurveFloat* ElevatorCurve;
 
 	// variable for the width of the door
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
@@ -53,6 +57,12 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+
+	UFUNCTION()
+		void OnAnimUpdate(float val);
+
+	UTimelineComponent* ElevatorAnim;
 
 public:	
 	// Called every frame
